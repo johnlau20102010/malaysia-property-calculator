@@ -1,0 +1,761 @@
+openapi: 3.0.3
+info:
+  title: Malaysia Property Calculator API
+  description: |
+    Comprehensive property transaction cost calculator API for Malaysia.
+    
+    ## Coverage
+    - West Malaysia (Peninsular Malaysia)
+    - Sarawak (East Malaysia)
+    - Sabah (East Malaysia)
+    
+    ## Features
+    - Stamp Duty Calculation
+    - Legal Fees (SRO 2023)
+    - RPGT (Real Property Gains Tax)
+    - Loan Agreement Costs
+    - Full Transaction Cost Breakdown
+    
+    ## Legal References
+    - Stamp Act 1949
+    - Real Property Gains Tax Act 1976
+    - National Land Code 1965
+    - Sarawak Land Code
+    - Sabah Land Ordinance
+    - Solicitor's Remuneration Order 2023
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api-support@malaysia-property-calculator.com
+    url: https://docs.malaysia-property-calculator.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.malaysia-property-calculator.com/v1
+    description: Production Server
+  - url: https://sandbox-api.malaysia-property-calculator.com/v1
+    description: Sandbox Server
+
+tags:
+  - name: Stamp Duty
+    description: Stamp duty calculations for property transfer
+  - name: Legal Fees
+    description: Solicitor legal fees calculation
+  - name: RPGT
+    description: Real Property Gains Tax calculation
+  - name: Purchase
+    description: Full purchase cost breakdown
+  - name: Sale
+    description: Property sale cost calculation
+  - name: Transfer
+    description: Property transfer (gift/inheritance) calculation
+  - name: Refinance
+    description: Refinancing cost calculation
+
+paths:
+  /calculate/stamp-duty:
+    post:
+      tags:
+        - Stamp Duty
+      summary: Calculate stamp duty for property transfer
+      description: Calculate stamp duty based on property price, region, and buyer status
+      operationId: calculateStampDuty
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StampDutyRequest'
+            examples:
+              west_malaysia:
+                summary: West Malaysia Property
+                value:
+                  price: 500000
+                  region: WM
+                  property_type: residential
+                  first_time_buyer: true
+                  buyer_status: citizen
+              sarawak:
+                summary: Sarawak Property
+                value:
+                  price: 1000000
+                  region: SWK
+              sabah:
+                summary: Sabah Property
+                value:
+                  price: 800000
+                  region: SBH
+      responses:
+        '200':
+          description: Successful calculation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StampDutyResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /calculate/legal-fees:
+    post:
+      tags:
+        - Legal Fees
+      summary: Calculate solicitor legal fees
+      description: Calculate legal fees based on Solicitor's Remuneration Order 2023
+      operationId: calculateLegalFees
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LegalFeesRequest'
+      responses:
+        '200':
+          description: Successful calculation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFeesResponse'
+
+  /calculate/rpgt:
+    post:
+      tags:
+        - RPGT
+      summary: Calculate Real Property Gains Tax
+      description: Calculate RPGT based on sale price, purchase price, and holding period
+      operationId: calculateRPGT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RPGTRequest'
+            examples:
+              citizen_6_years:
+                summary: Citizen selling after 6 years
+                value:
+                  sale_price: 800000
+                  purchase_price: 500000
+                  purchase_date: '2020-01-15'
+                  sale_date: '2026-03-23'
+                  seller_status: citizen
+              with_exemption:
+                summary: With private residence exemption
+                value:
+                  sale_price: 800000
+                  purchase_price: 500000
+                  purchase_date: '2020-01-15'
+                  sale_date: '2026-03-23'
+                  seller_status: citizen
+                  private_residence_exemption: true
+      responses:
+        '200':
+          description: Successful calculation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RPGTResponse'
+
+  /calculate/purchase:
+    post:
+      tags:
+        - Purchase
+      summary: Calculate full purchase cost breakdown
+      description: Comprehensive calculation of all costs for property purchase
+      operationId: calculatePurchase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseRequest'
+      responses:
+        '200':
+          description: Successful calculation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseResponse'
+
+  /calculate/sale:
+    post:
+      tags:
+        - Sale
+      summary: Calculate property sale costs
+      description: Calculate all costs for selling property including RPGT
+      operationId: calculateSale
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaleRequest'
+      responses:
+        '200':
+          description: Successful calculation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleResponse'
+
+  /calculate/transfer:
+    post:
+      tags:
+        - Transfer
+      summary: Calculate property transfer costs
+      description: Calculate costs for property transfer (gift/inheritance)
+      operationId: calculateTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '200':
+          description: Successful calculation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponse'
+
+  /calculate/refinance:
+    post:
+      tags:
+        - Refinance
+      summary: Calculate refinancing costs
+      description: Calculate costs for property refinancing
+      operationId: calculateRefinance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefinanceRequest'
+      responses:
+        '200':
+          description: Successful calculation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefinanceResponse'
+
+  /rates/stamp-duty:
+    get:
+      tags:
+        - Stamp Duty
+      summary: Get current stamp duty rates
+      description: Retrieve current stamp duty rate tables for all regions
+      operationId: getStampDutyRates
+      responses:
+        '200':
+          description: Stamp duty rates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StampDutyRates'
+
+  /rates/rpgt:
+    get:
+      tags:
+        - RPGT
+      summary: Get current RPGT rates
+      description: Retrieve current RPGT rate tables
+      operationId: getRPGTRates
+      responses:
+        '200':
+          description: RPGT rates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RPGTRates'
+
+  /rates/legal-fees:
+    get:
+      tags:
+        - Legal Fees
+      summary: Get current legal fee rates
+      description: Retrieve current legal fee scale (SRO 2023)
+      operationId: getLegalFeeRates
+      responses:
+        '200':
+          description: Legal fee rates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFeeRates'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+
+  schemas:
+    Region:
+      type: string
+      enum: [WM, SWK, SBH]
+      description: |
+        Region codes:
+        - `WM`: West Malaysia (Peninsular)
+        - `SWK`: Sarawak
+        - `SBH`: Sabah
+
+    BuyerStatus:
+      type: string
+      enum: [citizen, pr, foreigner]
+      default: citizen
+
+    SellerStatus:
+      type: string
+      enum: [citizen, pr, foreigner, company]
+      default: citizen
+
+    PropertyType:
+      type: string
+      enum: [residential, commercial, industrial, agricultural, vacant]
+      default: residential
+
+    TransferType:
+      type: string
+      enum: [gift, inheritance, court]
+
+    Relationship:
+      type: string
+      enum: [spouse, parent_child, sibling, other]
+
+    Tenure:
+      type: string
+      enum: [freehold, leasehold]
+
+    StampDutyRequest:
+      type: object
+      required: [price, region]
+      properties:
+        price:
+          type: number
+          minimum: 0
+          description: Property price in RM
+          example: 500000
+        region:
+          $ref: '#/components/schemas/Region'
+        property_type:
+          $ref: '#/components/schemas/PropertyType'
+        first_time_buyer:
+          type: boolean
+          default: false
+        buyer_status:
+          $ref: '#/components/schemas/BuyerStatus'
+
+    LegalFeesRequest:
+      type: object
+      required: [consideration]
+      properties:
+        consideration:
+          type: number
+          minimum: 0
+          example: 500000
+        include_sst:
+          type: boolean
+          default: true
+
+    RPGTRequest:
+      type: object
+      required: [sale_price, purchase_price, purchase_date, sale_date]
+      properties:
+        sale_price:
+          type: number
+          example: 800000
+        purchase_price:
+          type: number
+          example: 500000
+        purchase_date:
+          type: string
+          format: date
+          example: '2020-01-15'
+        sale_date:
+          type: string
+          format: date
+          example: '2026-03-23'
+        seller_status:
+          $ref: '#/components/schemas/SellerStatus'
+        property_category:
+          $ref: '#/components/schemas/PropertyType'
+        private_residence_exemption:
+          type: boolean
+          default: false
+
+    PurchaseRequest:
+      type: object
+      required: [purchase_price, region]
+      properties:
+        purchase_price:
+          type: number
+          example: 600000
+        loan_amount:
+          type: number
+          default: 0
+          example: 540000
+        region:
+          $ref: '#/components/schemas/Region'
+        property_type:
+          $ref: '#/components/schemas/PropertyType'
+        tenure:
+          $ref: '#/components/schemas/Tenure'
+        buyer_status:
+          $ref: '#/components/schemas/BuyerStatus'
+        first_time_buyer:
+          type: boolean
+          default: false
+        spa_date:
+          type: string
+          format: date
+
+    SaleRequest:
+      type: object
+      required: [sale_price, purchase_price, purchase_date, sale_date]
+      properties:
+        sale_price:
+          type: number
+          example: 800000
+        purchase_price:
+          type: number
+          example: 500000
+        purchase_date:
+          type: string
+          format: date
+        sale_date:
+          type: string
+          format: date
+        seller_status:
+          $ref: '#/components/schemas/SellerStatus'
+        property_category:
+          $ref: '#/components/schemas/PropertyType'
+        private_residence_exemption:
+          type: boolean
+          default: false
+        agent_commission_rate:
+          type: number
+          default: 0.025
+
+    TransferRequest:
+      type: object
+      required: [market_value, region, transfer_type, relationship]
+      properties:
+        market_value:
+          type: number
+          example: 500000
+        region:
+          $ref: '#/components/schemas/Region'
+        transfer_type:
+          $ref: '#/components/schemas/TransferType'
+        relationship:
+          $ref: '#/components/schemas/Relationship'
+
+    RefinanceRequest:
+      type: object
+      required: [new_loan_amount]
+      properties:
+        new_loan_amount:
+          type: number
+          example: 600000
+        existing_loan_balance:
+          type: number
+          default: 0
+          example: 400000
+        property_value:
+          type: number
+          example: 800000
+
+    StampDutyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            price:
+              type: number
+            region:
+              type: string
+            region_name:
+              type: string
+            stamp_duty:
+              type: object
+              properties:
+                gross_duty:
+                  type: number
+                exemption:
+                  type: number
+                exemption_reason:
+                  type: string
+                net_duty:
+                  type: number
+            breakdown:
+              type: array
+              items:
+                type: object
+                properties:
+                  tier:
+                    type: integer
+                  range:
+                    type: string
+                  rate:
+                    type: string
+                  amount:
+                    type: number
+            effective_rate:
+              type: string
+            land_law:
+              type: string
+        timestamp:
+          type: string
+          format: date-time
+        api_version:
+          type: string
+
+    LegalFeesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            consideration:
+              type: number
+            legal_fees:
+              type: object
+              properties:
+                base_fee:
+                  type: number
+                minimum_applied:
+                  type: boolean
+            sst:
+              type: object
+              properties:
+                rate:
+                  type: string
+                amount:
+                  type: number
+                enabled:
+                  type: boolean
+            total_legal_cost:
+              type: number
+            regulation:
+              type: string
+
+    RPGTResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            sale_price:
+              type: number
+            purchase_price:
+              type: number
+            capital_gain:
+              type: number
+            holding_period:
+              type: object
+              properties:
+                years:
+                  type: integer
+                months:
+                  type: integer
+                days:
+                  type: integer
+                total_days:
+                  type: integer
+            rpgt:
+              type: object
+              properties:
+                rate:
+                  type: string
+                rate_tier:
+                  type: string
+                gross_tax:
+                  type: number
+                exemption_applied:
+                  type: number
+                exemption_reason:
+                  type: string
+                net_tax:
+                  type: number
+            legislation:
+              type: string
+
+    PurchaseResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            transaction:
+              type: object
+            spa_costs:
+              type: object
+            loan_costs:
+              type: object
+            total_transaction_cost:
+              type: number
+            percentage_of_price:
+              type: string
+
+    SaleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            transaction:
+              type: object
+            holding_period:
+              type: object
+            rpgt:
+              type: object
+            sale_costs:
+              type: object
+            net_proceeds:
+              type: object
+            roi:
+              type: object
+
+    TransferResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            transaction:
+              type: object
+            stamp_duty:
+              type: object
+            legal_fees:
+              type: object
+            total_cost:
+              type: number
+            exemption_status:
+              type: string
+
+    RefinanceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            transaction:
+              type: object
+            new_loan_costs:
+              type: object
+            discharge_costs:
+              type: object
+            total_cost:
+              type: number
+            net_cash_out:
+              type: number
+
+    StampDutyRates:
+      type: object
+      properties:
+        west_malaysia:
+          type: array
+          items:
+            type: object
+        sarawak:
+          type: array
+          items:
+            type: object
+        sabah:
+          type: array
+          items:
+            type: object
+
+    RPGTRates:
+      type: object
+      properties:
+        citizen_pr:
+          type: array
+          items:
+            type: object
+        foreigner_company:
+          type: array
+          items:
+            type: object
+
+    LegalFeeRates:
+      type: object
+      properties:
+        tiers:
+          type: array
+          items:
+            type: object
+        sst_rate:
+          type: string
+        regulation:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum: [VALIDATION_ERROR, INVALID_REGION, INVALID_DATE, CALCULATION_ERROR, RATE_LIMIT_EXCEEDED, API_KEY_INVALID, API_KEY_EXPIRED]
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+                  value:
+                    type: string
+        timestamp:
+          type: string
+          format: date-time
+        request_id:
+          type: string
+
+security:
+  - ApiKeyAuth: []
